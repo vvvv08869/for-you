@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Our Cinema Story</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600&family=Montserrat:wght@300;400;500&display=swap" rel="stylesheet">
+
+<style>
+:root {
+    --bg-dark: #1a050a;
+    --accent: #8e1e33;
+    --gold: #d4af37;
+    --text: #fdfaf5;
+@keyframes fall { 
+    to { transform: translateY(110vh) rotate(360deg); } 
+}
+}
+
+body {
+    margin: 0;
+    font-family: 'Montserrat', sans-serif;
+    color: var(--text);
+    background: #000;
+    overflow: hidden; /* Чтобы работал слайдер */
+}
+
+/* ФОНОВЫЕ ЭФФЕКТЫ */
+.bg-layer {
+    position: fixed;
+    inset: 0;
+    background: radial-gradient(circle at center, #3b0a16 0%, #1a050a 100%);
+    z-index: -2;
+}
+@keyframes bgGradient { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+
+.light-leaks {
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background: 
+        radial-gradient(circle at 20% 20%, rgba(142, 30, 51, 0.4), transparent 50%),
+        radial-gradient(circle at 80% 80%, rgba(59, 10, 22, 0.4), transparent 50%);
+    filter: blur(80px);
+    animation: leakMove 10s infinite alternate ease-in-out;
+}
+@keyframes leakMove { from { transform: scale(1); } to { transform: scale(1.3) translate(5%, 5%); } }
+
+.cinema-lines {
+    position: fixed;
+    inset: 0;
+    z-index: 5;
+    pointer-events: none;
+    background: linear-gradient(to bottom, transparent 50%, rgba(0, 0, 0, 0.1) 50%);
+    background-size: 100% 4px;
+    animation: moveLines 15s linear infinite;
+}
+@keyframes moveLines { from { background-position: 0 0; } to { background-position: 0 100%; } }
+
+.grain {
+    position: fixed;
+    inset: -50%;
+    z-index: 4;
+    pointer-events: none;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3BaseFilter id='filter'%3BfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23filter)'/%3E%3C/svg%3E");
+    opacity: 0.05;
+    animation: grainAnim 0.8s steps(1) infinite;
+}
+@keyframes grainAnim { 0%, 100% { transform: translate(0,0); } 50% { transform: translate(-1%, 2%); } }
+
+/* КОНТЕЙНЕР ДЛЯ ПЕРЕЛИСТЫВАНИЯ */
+.wrapper {
+    display: flex;
+    width: 500vw; /* 5 страниц */
+    height: 100vh;
+    transition: transform 1s cubic-bezier(0.86, 0, 0.07, 1);
+    z-index: 10;
+}
+
+.screen {
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+/* Список фильмов со скроллом */
+.movies-scroll {
+    overflow-y: auto;
+    width: 100%;
+    max-width: 600px;
+    padding: 60px 20px;
+}
+
+h1 { font-family: 'Cormorant Garamond', serif; font-size: clamp(35px, 8vw, 65px); text-shadow: 0 0 20px rgba(0,0,0,0.5); }
+
+button {
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 50px;
+    padding: 15px 45px;
+    background: var(--accent);
+    color: white;
+    font-family: inherit;
+    cursor: pointer;
+    transition: 0.4s;
+    margin-top: 25px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+}
+button:hover { transform: scale(1.05); background: #b0233d; }
+
+/* КАССЕТА */
+.vhs {
+    width: 280px; height: 165px; background: #111; border-radius: 10px; position: relative;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.8);
+}
+.vhs-label {
+    position: absolute; top: 15px; left: 15px; right: 15px; height: 100px;
+    background: #e5d5c5; border-radius: 5px; display: flex; justify-content: space-around; align-items: center;
+}
+.wheel { width: 45px; height: 45px; border: 4px dashed #6d1a2d; border-radius: 50%; animation: rotate 4s linear infinite; }
+@keyframes rotate { to { transform: rotate(360deg); } }
+
+/* КАРТОЧКИ ФИЛЬМОВ (ИСПРАВЛЕНО НАЗВАНИЕ) */
+.year { font-family: 'Cormorant Garamond'; font-size: 42px; margin: 40px 0 20px; color: var(--gold); }
+.card { 
+    display: flex; align-items: center; background: rgba(255, 255, 255, 0.05); 
+    margin: 0 auto 15px; padding: 15px; border-radius: 15px; text-align: left; 
+    backdrop-filter: blur(5px); border: 1px solid rgba(255,255,255,0.05);
+}
+.card img { width: 60px; height: 85px; border-radius: 8px; margin-right: 20px; object-fit: cover; flex-shrink: 0; }
+.card-info { flex-grow: 1; }
+.card-info b { font-size: 17px; display: block; line-height: 1.3; margin-bottom: 5px; color: #fff; }
+.card-info small { opacity: 0.7; color: #eee; }
+
+/* ФИНАЛ */
+.final-cat { position: relative; display: inline-block; }
+.cat-img { width: 240px; border-radius: 30px; border: 4px solid white; box-shadow: 0 15px 45px rgba(0,0,0,0.7); }
+.envelope { 
+    position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); 
+    background: #fff; color: #d63384; padding: 8px 22px; border-radius: 12px; 
+    font-weight: bold; animation: float 3s ease-in-out infinite; 
+}
+@keyframes float { 0%, 100% { transform: translate(-50%, 0); } 50% { transform: translate(-50%, -12px); } }
+
+.big-heart { font-size: 75px; margin-top: 15px; animation: heartbeat 1.2s infinite; cursor: pointer; filter: drop-shadow(0 0 15px #ff4d6d); }
+@keyframes heartbeat { 0% { transform: scale(1); } 15% { transform: scale(1.3); } 30% { transform: scale(1); } }
+
+/* СЕРДЕЧКИ */
+.heart-stream { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+.tiny-heart { position: absolute; color: #ff85a1; opacity: 0.6; animation: flyUp 4s linear infinite; }
+@keyframes flyUp { 0% { transform: translateY(100vh) scale(0); opacity: 0; } 50% { opacity: 0.8; } 100% { transform: translateY(-10vh) scale(1.5); opacity: 0; } }
+
+/* POPUP */
+.overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.97); z-index: 10000; justify-content: center; align-items: center; padding: 20px; }
+.letter { background: #3b0a16; padding: 40px; border-radius: 30px; max-width: 500px; text-align: center; border: 1px solid var(--gold); box-shadow: 0 0 50px rgba(142,30,51,0.5); }
+</style>
+</head>
+<body>
+
+<div class="falling-container" id="fallingItems"></div>
+<div class="bg-layer"></div>
+<div class="light-leaks"></div>
+<div class="cinema-lines"></div>
+<div class="grain"></div>
+
+<audio id="bgMusic" src="music_for_your_site.mp3" loop></audio>
+
+<div class="wrapper" id="slider">
+    
+    <!-- 1. СТАРТ -->
+    <div class="screen">
+        <h1>Our Movie Story</h1>
+        <p style="letter-spacing: 3px; opacity: 0.7; font-size: 14px;">SESSION STARTING...</p>
+        <button onclick="slide(1)">Начать просмотр</button>
+    </div>
+
+    <!-- 2. КАССЕТА -->
+    <div class="screen">
+        <div class="vhs">
+            <div class="vhs-label"><div class="wheel"></div><div class="wheel"></div></div>
+        </div>
+        <button onclick="slide(2)">Вставить кассету</button>
+    </div>
+
+    <!-- 3. ИНТРО -->
+    <div class="screen">
+        <h2 style="font-family: 'Cormorant Garamond'; font-size: 38px;">Давай посмотрим список наших фильмов</h2>
+        <p style="max-width: 450px; opacity: 0.8; line-height: 1.6;">За каждым названием скрывается вечер, который я никогда не забуду.</p>
+        <button onclick="slide(3)">Смотреть список</button>
+    </div>
+
+    <!-- 4. СПИСОК -->
+    <div class="screen">
+        <div class="movies-scroll">
+            <div class="year">2024 год</div>
+            <div class="card"><img src="images/1.jpg"><div class="card-info"><b>Любит не любит</b><small>27.08.2024</small></div></div>
+            <div class="card"><img src="images/2.jpg"><div class="card-info"><b>Укрась прощальное утро цветами</b><small>29.08.2024</small></div></div>
+            <div class="card"><img src="images/3.jpg"><div class="card-info"><b>Здравствуй мир</b><small>30.08.2024</small></div></div>
+            <div class="card"><img src="images/4.jpg"><div class="card-info"><b>Для твоих глаз</b><small>01.09.2024</small></div></div>
+            <div class="card"><img src="images/5.jpg"><div class="card-info"><b>Ангел по соседству</b><small>02.09.2024</small></div></div>
+            <div class="card"><img src="images/6.jpg"><div class="card-info"><b>Её заветное желание</b><small>08.09.2024</small></div></div>
+            <div class="card"><img src="images/7.jpg"><div class="card-info"><b>Могила светлячков</b><small>14.09.2024</small></div></div>
+            <div class="card"><img src="images/8.jpg"><div class="card-info"><b>Она видела небо</b><small>15.09.2024</small></div></div>
+            <div class="card"><img src="images/9.jpg"><div class="card-info"><b>Летний призрак</b><small>21.09.2024</small></div></div>
+            <div class="card"><img src="images/10.jpg"><div class="card-info"><b>Единственному мне...</b><small>22.09.2024</small></div></div>
+            <div class="card"><img src="images/11.jpg"><div class="card-info"><b>Лис и пёс</b><small>28.09.2024</small></div></div>
+            <div class="card"><img src="images/12.jpg"><div class="card-info"><b>Сквозь слезы я притворяюсь кошкой</b><small>29.09.2024</small></div></div>
+            <div class="card"><img src="images/13.jpg"><div class="card-info"><b>Сердцу хочется кричать</b><small>06.10.2024</small></div></div>
+            <div class="card"><img src="images/14.jpg"><div class="card-info"><b>Дотянуться до тебя</b><small>13.10.2024</small></div></div>
+            <div class="card"><img src="images/15.jpg"><div class="card-info"><b>Глупый свин...</b><small>15.10.2024</small></div></div>
+            <div class="card"><img src="images/16.jpg"><div class="card-info"><b>На одной волне с тобой</b><small>20.10.2024</small></div></div>
+
+            <div class="year">2025 год</div>
+            <div class="card"><img src="images/17.jpg"><div class="card-info"><b>Очень страшное кино 4</b><small>31.10.2025</small></div></div>
+            <div class="card"><img src="images/18.jpg"><div class="card-info"><b>Женщина в черном</b><small>02.11.2025</small></div></div>
+            <div class="card"><img src="images/19.jpg"><div class="card-info"><b>Человек бензопила</b><small>13.12.2025</small></div></div>
+            <div class="card"><img src="images/20.jpg"><div class="card-info"><b>Гринч похититель рождества</b><small>15.12.2025</small></div></div>
+
+            <div class="year">2026 год</div>
+            <div class="card"><img src="images/21.jpg"><div class="card-info"><b>Моана 2</b><small>03.02.2026</small></div></div>
+            <div class="card"><img src="images/22.jpg"><div class="card-info"><b>Выход 8</b><small>04.02.2026</small></div></div>
+            <div class="card"><img src="images/23.jpg"><div class="card-info"><b>Поток</b><small>07.03.2026</small></div></div>
+            <div class="card"><img src="images/24.jpg"><div class="card-info"><b>Потэма наоборот</b><small>08.03.2026</small></div></div>
+            <div class="card"><img src="images/25.jpg"><div class="card-info"><b>Идеальный мир</b><small>14.03.2026</small></div></div>
+            <div class="card"><img src="images/26.jpg"><div class="card-info"><b>Как стать принцессой</b><small>15.03.2026</small></div></div>
+            <div class="card"><img src="images/27.jpg"><div class="card-info"><b>Вкусы молодости</b><small>26.03.2026</small></div></div>
+            <div class="card"><img src="images/28.jpg"><div class="card-info"><b>До встречи с тобой</b><small>27.03.2026</small></div></div>
+            <div class="card"><img src="images/29.jpg"><div class="card-info"><b>Виноваты звезды</b><small>13.04.2026</small></div></div>
+            <div class="card"><img src="images/30.jpg"><div class="card-info"><b>Бойфренд из будущего</b><small>25.04.2026</small></div></div>
+            <div class="card"><img src="images/31.jpg"><div class="card-info"><b>Дневник памяти</b><small>26.04.2026</small></div></div>
+
+            <button onclick="slide(4)" style="margin-bottom: 50px;">For you ❤️</button>
+        </div>
+    </div>
+
+    <!-- 5. ФИНАЛ -->
+    <div class="screen" style="position: relative;">
+        <div class="heart-stream" id="heartFlow"></div>
+        <div class="final-cat" onclick="openMsg()">
+            <img src="images/final.jpg" class="cat-img">
+            <div class="envelope">Для тебя 💌</div>
+        </div>
+        <div class="big-heart" onclick="openMsg()">💗</div>
+    </div>
+
+</div>
+
+<!-- MESSAGE -->
+<div id="pop" class="overlay" onclick="closeMsg()">
+    <div class="letter" onclick="event.stopPropagation()">
+        <p>Я просто хочу сказать тебе спасибо за то, что ты есть 🫂<br><br>
+        Мы смотрим фильмы вместе уже три года, и за это время я понял, что дело даже не в сюжетах на экране, а в том с кем я это смотрю.<br><br>
+        Ты лучшая!! Мне безумно нравится проводить с тобой время, делиться мыслями и просто знать, что мы есть друг у друга. Спасибо за каждый вечер проведенный вместе и за ту искренность, которую ты даришь.<br><br>
+        Очень ценю нашу традицию и обожаю тебя! 💗🫂</p>
+        <button onclick="closeMsg()">Закрыть</button>
+    </div>
+</div>
+
+<script>
+function slide(num) {
+    const slider = document.getElementById('slider');
+    slider.style.transform = `translateX(-${num * 100}vw)`;
+    
+    // Музыка при переходе к кассете
+    if(num === 1) {
+        const m = document.getElementById('bgMusic');
+        m.volume = 0.4;
+        m.play().catch(() => console.log("Музыка ждет клика"));
+    }
+    
+    // Сердечки в финале
+    if(num === 4) { createHearts(); }
+}
+
+function openMsg() { document.getElementById('pop').style.display = 'flex'; }
+function closeMsg() { document.getElementById('pop').style.display = 'none'; }
+
+function createHearts() {
+    const container = document.getElementById('heartFlow');
+    for(let i=0; i<30; i++) {
+        setTimeout(() => {
+            const h = document.createElement('div');
+            h.innerHTML = '❤️';
+            h.className = 'tiny-heart';
+            h.style.left = Math.random() * 100 + '%';
+            h.style.animationDuration = (Math.random() * 2 + 3) + 's';
+            container.appendChild(h);
+            setTimeout(() => h.remove(), 4000);
+        }, i * 200);
+    }
+}
+
+function initCinemaRain() {
+    const container = document.getElementById('fallingItems');
+    const items = ['🍿', '🎞️', '📼', '🎬'];
+    
+    for (let i = 0; i < 40; i++) {
+        const span = document.createElement('span');
+        span.innerHTML = items[Math.floor(Math.random() * items.length)];
+        span.style.position = 'absolute';
+        span.style.left = Math.random() * 100 + 'vw';
+        span.style.top = '-50px';
+        span.style.fontSize = (Math.random() * 20 + 20) + 'px';
+        span.style.opacity = '0.4';
+        
+        // Анимация падения
+        const duration = Math.random() * 3 + 4;
+        const delay = Math.random() * 5;
+        span.style.animation = `fall ${duration}s ${delay}s linear infinite`;
+        
+        container.appendChild(span);
+    }
+}
+
+// Запускаем сразу при загрузке
+initCinemaRain();
+
+
+</script>
+
+</body>
+</html>
